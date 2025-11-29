@@ -4,13 +4,20 @@ import { actionAgent } from './agents/action';
 import { resolverAgent } from './agents/resolver';
 
 export async function runPipeline(userMessage, env) {
-	// <--- ADD env here
+	const intake = await intakeAgent(userMessage, env);
 
-	const intake = await intakeAgent(userMessage, env); // <--- Pass env
+	// NEW: Check for the memory_resolver route
+	if (intake.route === 'memory_resolver') {
+		return {
+			intake,
+			final: intake.memory_result, // Immediately return the stored result
+		};
+	}
+	// ------------------------------------------
 
-	const action = await actionAgent(intake.summary, env); // <--- Pass env
+	const action = await actionAgent(intake.summary, env);
 
-	const resolver = await resolverAgent(action.processed, env); // <--- Pass env
+	const resolver = await resolverAgent(action.processed, env);
 
 	return {
 		intake,
@@ -19,3 +26,4 @@ export async function runPipeline(userMessage, env) {
 		final: resolver.result,
 	};
 }
+c;

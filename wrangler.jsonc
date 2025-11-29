@@ -12,5 +12,12 @@
 	},
 	"observability": {
 		"enabled": true
-	}
+	},
+	"kv_namespaces": [
+		{
+			"binding": "MEMORY",
+			"id": "cba770a59a014a14b5dd568e819abb0b",
+			"remote": true
+		}
+	]
 }
