@@ -7,7 +7,7 @@ export default {
 
 		if (url.pathname === '/run') {
 			const data = await request.json();
-			const output = await runPipeline(data.message);
+			const output = await runPipeline(data.message, env); // <--- ADD env here
 			return new Response(JSON.stringify(output, null, 2), {
 				headers: { 'content-type': 'application/json' },
 			});

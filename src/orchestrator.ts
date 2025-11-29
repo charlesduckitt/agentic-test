@@ -3,12 +3,14 @@ import { intakeAgent } from './agents/intake';
 import { actionAgent } from './agents/action';
 import { resolverAgent } from './agents/resolver';
 
-export async function runPipeline(userMessage) {
-	const intake = await intakeAgent(userMessage);
+export async function runPipeline(userMessage, env) {
+	// <--- ADD env here
 
-	const action = await actionAgent(intake.summary);
+	const intake = await intakeAgent(userMessage, env); // <--- Pass env
 
-	const resolver = await resolverAgent(action.processed);
+	const action = await actionAgent(intake.summary, env); // <--- Pass env
+
+	const resolver = await resolverAgent(action.processed, env); // <--- Pass env
 
 	return {
 		intake,
