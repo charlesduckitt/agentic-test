@@ -26,7 +26,7 @@ export async function intakeAgent(message, env) {
 Input: "${message}"
 Produce ONLY a JSON object with:
 - summary: one sentence summary of the issue
-- route: which agent should handle it next ("action" or "resolver")
+- route: which agent should handle it next ("data_action" or "resolver")
 
 JSON:`,
 	});

@@ -1,29 +1,45 @@
 // @ts-nocheck
 import { intakeAgent } from './agents/intake';
-import { actionAgent } from './agents/action';
-import { resolverAgent } from './agents/resolver';
+import { actionAgent as dataActionAgent } from './tools/data_action'; // Renamed import
+import { resolverAgent as dataResolverAgent } from './tools/data_resolver'; // Renamed import
 
 export async function runPipeline(userMessage, env) {
 	const intake = await intakeAgent(userMessage, env);
 
-	// NEW: Check for the memory_resolver route
+	// Handle the Memory Shortcut
 	if (intake.route === 'memory_resolver') {
 		return {
 			intake,
-			final: intake.memory_result, // Immediately return the stored result
+			final: intake.memory_result,
 		};
 	}
-	// ------------------------------------------
 
-	const action = await actionAgent(intake.summary, env);
+	// Handle Dynamic Routing
+	if (intake.route === 'data_action') {
+		const action = await dataActionAgent(intake.summary, env);
+		const resolver = await dataResolverAgent(action.processed, env);
+		return {
+			intake,
+			action,
+			resolver,
+			final: resolver.result,
+		};
+	}
 
-	const resolver = await resolverAgent(action.processed, env);
+	// You would add more routes here (e.g., if (intake.route === "email_action") { ... }
+	// Handle direct resolver route (LLM sends "resolver")
+	if (intake.route === 'resolver') {
+		const resolver = await dataResolverAgent(intake.summary, env);
+		return {
+			intake,
+			resolver,
+			final: resolver.result,
+		};
+	}
 
+	// Default Fallback
 	return {
 		intake,
-		action,
-		resolver,
-		final: resolver.result,
+		final: `Error: Intake Agent routed to unknown path: ${intake.route}`,
 	};
 }
-c;
