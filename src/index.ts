@@ -37,8 +37,39 @@ export default {
 
 		if (url.pathname === '/run') {
 			try {
-				const data = await request.json();
-				const output = await runPipeline(data.message, env);
+				let payload;
+
+				const contentType = request.headers.get('content-type') || '';
+				if (contentType.includes('multipart/form-data')) {
+					// Handle form submissions with file uploads (from the frontend)
+					const form = await request.formData();
+					const msg = form.get('message') || '';
+					const file = form.get('file') || form.get('image') || null;
+					if (file && typeof file.arrayBuffer === 'function') {
+						const buf = await file.arrayBuffer();
+						// Convert ArrayBuffer to base64 safely
+						function arrayBufferToBase64(buffer) {
+							let binary = '';
+							const bytes = new Uint8Array(buffer);
+							const chunkSize = 0x8000;
+							for (let i = 0; i < bytes.length; i += chunkSize) {
+								binary += String.fromCharCode.apply(null, Array.from(bytes.subarray(i, i + chunkSize)));
+							}
+							return btoa(binary);
+						}
+						const base64 = arrayBufferToBase64(buf);
+						// Create a structured payload that the intake agent recognizes for UDAA flow
+						payload = { context: 'UDAA_INFER', query: msg, image_data: base64 };
+					} else {
+						payload = msg;
+					}
+				} else {
+					// Default: expect JSON body
+					const data = await request.json();
+					payload = data.message !== undefined ? data.message : data;
+				}
+
+				const output = await runPipeline(payload, env);
 
 				return new Response(JSON.stringify(output, null, 2), {
 					headers: {
