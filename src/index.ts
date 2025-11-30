@@ -48,12 +48,14 @@ export default {
 				});
 			} catch (err) {
 				console.error('Worker Execution Error:', err.message);
+				console.error('Full Error:', err);
 
 				return new Response(
 					JSON.stringify({
 						error: 'Failed to process request',
 						// This is where we look for the missing binding error!
 						details: err.message,
+						stack: err.stack,
 					}),
 					{
 						headers: {
