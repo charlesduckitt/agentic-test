@@ -41,8 +41,7 @@ export async function runPipeline(message, env) {
 	} else if (intake.route === 'data_resolver') {
 		// This is where the crash was. It now correctly calls the imported function.
 		// NOTE: dataResolverAgent receives input from the previous step.
-		const inputForResolver = agentResult ? agentResult.processed : intake.received;
-		agentResult = await dataResolverAgent(inputForResolver, env);
+		agentResult = await dataResolverAgent(intake.received, env);
 	} else {
 		// Handle the default LLM route
 		agentResult = await defaultLLMAgent(intake.received, env);
