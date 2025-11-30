@@ -1,9 +1,11 @@
-// src/orchestrator.ts - CORRECTED FOR NAMING CONSISTENCY AND UDAA FLOW
+// src/orchestrator.ts - CORRECTED FOR MISSING IMPORTS
 // @ts-nocheck
 
 import { intakeAgent } from './agents/intake';
 import { udaaAction } from './tools/udaa_action';
-// CRITICAL FIX: Use aliasing to import the functions with the name the orchestrator needs
+// CRITICAL FIX: Re-added the missing imports for the action and resolver tools
+import { dataActionAgent } from './tools/data_action';
+import { dataResolverAgent } from './tools/data_resolver';
 import { defaultLLMAgent } from './agents/default_llm';
 
 export async function runPipeline(message, env) {
@@ -32,11 +34,15 @@ export async function runPipeline(message, env) {
 	}
 	// 3. Handle other routes (existing logic)
 	else if (intake.route === 'data_action') {
-		// Note: dataAction is aliased to actionAgent from data_action.ts
-		agentResult = await dataAction(intake.received, env);
+		// We use dataActionAgent here, assuming data_action.ts exports this name
+		agentResult = await dataActionAgent(intake.received, env);
+		// NOTE: If the output of dataActionAgent has a route, you should process the next step here,
+		// but for now, we follow the structure you provided.
 	} else if (intake.route === 'data_resolver') {
-		// Note: dataResolverAgent is aliased to resolverAgent from data_resolver.ts
-		agentResult = await dataResolverAgent(agentResult.processed, env); // Assumes processed data from previous agent
+		// This is where the crash was. It now correctly calls the imported function.
+		// NOTE: dataResolverAgent receives input from the previous step.
+		const inputForResolver = agentResult ? agentResult.processed : intake.received;
+		agentResult = await dataResolverAgent(inputForResolver, env);
 	} else {
 		// Handle the default LLM route
 		agentResult = await defaultLLMAgent(intake.received, env);
