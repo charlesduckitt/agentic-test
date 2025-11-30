@@ -1,53 +1,48 @@
+// src/agents/intake.ts - Corrected for UDAA Structured Payload Routing
 // @ts-nocheck
+
+// Assuming you have a basic function signature like this:
 export async function intakeAgent(message, env) {
-	// --- Start: Memory Check/Tool Emulation ---
+	// Check if the input is a structured JSON object (from the new frontend UDAA flow)
+	const isStructured = typeof message === 'object' && message.context;
 
-	// 1. Check for specific historical queries (e.g., "last price")
-	if (message.toLowerCase().includes('bitcoin') && (message.toLowerCase().includes('last') || message.toLowerCase().includes('previous'))) {
-		const lastPrice = await env.MEMORY.get('last_bitcoin_price');
-
-		if (lastPrice) {
-			// If a history exists, immediately resolve the request
-			return {
-				agent: 'intake',
-				received: message,
-				summary: 'User requested the last retrieved Bitcoin price from memory.',
-				route: 'memory_resolver', // NEW ROUTE for immediate resolution
-				memory_result: lastPrice, // Pass the result directly
-			};
-		}
+	// --- UDAA Inference/Execution Route ---
+	if (isStructured && (message.context === 'UDAA_INFER' || message.context === 'UDAA_EXECUTE')) {
+		return {
+			agent: 'intake',
+			received: message.query,
+			full_payload: message, // CRITICAL: Pass the full structured payload
+			summary: `UDAA action request for context: ${message.context}.`,
+			route: 'udaa_action',
+		};
 	}
 
-	// --- End: Memory Check/Tool Emulation ---
+	// --- Standard Q&A Routing (Fallback for simple text queries) ---
+	// If it's not a structured UDAA payload, assume it's a simple text query.
 
-	// 2. Fallback to LLM for all other queries
-	const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
-		prompt: `You are the Intake Agent.
-Input: "${message}"
-Produce ONLY a JSON object with:
-- summary: one sentence summary of the issue
-- route: which agent should handle it next ("data_action" or "resolver")
+	const lowerCaseMessage = (typeof message === 'string' ? message : '').toLowerCase();
 
-JSON:`,
-	});
-
-	// ... (rest of the robust parsing logic remains the same) ...
-	let jsonString = response.response;
-	jsonString = jsonString.trim().replace(/^```json\s*|```\s*$/g, '');
-
-	let parsed;
-	try {
-		parsed = JSON.parse(jsonString);
-	} catch (e) {
-		console.error('Failed to parse JSON from AI response:', jsonString);
-		throw new Error(`AI JSON Parsing Failed. Check agent prompt/output. Original Error: ${e.message}`);
+	if (lowerCaseMessage.includes('data')) {
+		return {
+			agent: 'intake',
+			received: message,
+			summary: 'Routing to data resolver for database query.',
+			route: 'data_resolver',
+		};
+	} else if (lowerCaseMessage.includes('action') || lowerCaseMessage.includes('create')) {
+		return {
+			agent: 'intake',
+			received: message,
+			summary: 'Routing to data action for database modification.',
+			route: 'data_action',
+		};
 	}
 
-	// 3. Return the structured output from LLM
+	// Default route for any other query
 	return {
 		agent: 'intake',
 		received: message,
-		summary: parsed.summary,
-		route: parsed.route,
+		summary: 'Routing to a general LLM agent for response generation.',
+		route: 'default_llm',
 	};
 }

@@ -1,5 +1,5 @@
 // @ts-nocheck
-export async function actionAgent(summary, env) {
+export async function dataAction(summary, env) {
 	// Ask the model to analyze the summary and determine the required action
 	const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
 		prompt: `You are the Action Agent.

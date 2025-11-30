@@ -19,5 +19,12 @@
 			"id": "cba770a59a014a14b5dd568e819abb0b",
 			"remote": true
 		}
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "wealth_data_store",
+			"database_id": "72246517-6cd9-49fb-afbb-f1ea0e86f842"
+		}
 	]
 }
