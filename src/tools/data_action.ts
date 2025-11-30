@@ -1,7 +1,9 @@
 // @ts-nocheck
+import { safeAiRun } from './ai_client';
+
 export async function dataActionAgent(summary, env) {
 	// Ask the model to analyze the summary and determine the required action
-	const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+	const response = await safeAiRun(env, '@cf/meta/llama-3.1-8b-instruct', {
 		prompt: `You are the Action Agent.
 Input Summary: "${summary}"
 Produce ONLY a JSON object with:
