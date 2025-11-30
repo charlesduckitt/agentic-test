@@ -1,6 +1,6 @@
 // src/tools/udaa_action.ts - COMPLETE FINAL CODE (Applying fixes to user's original long file structure)
 // @ts-nocheck
-import { visionAgent } from './vision_agent';
+import { visionAgentFunction } from './vision_agent';
 
 // Helper to generate D1 SQL from the proposed schema
 function createTableSQL(tableName, fields) {
@@ -32,7 +32,7 @@ function createTableSQL(tableName, fields) {
 	return `CREATE TABLE IF NOT EXISTS ${tableName} (${allColumns});`;
 }
 
-export async function udaaAction(fullPayload, env) {
+export async function udaaActionAgent(fullPayload, env) {
 	const { context, schema, query, image_data } = fullPayload;
 
 	// --- PHASE 1: SCHEMA INFERENCE (UDAA_INFER) ---
@@ -41,7 +41,7 @@ export async function udaaAction(fullPayload, env) {
 			return { final_answer: 'Inference requires image data or pasted text for OCR/LLM processing.', success: false };
 		}
 
-		const visionResult = await visionAgent(image_data, query, env);
+		const visionResult = await visionAgentFunction(image_data, query, env);
 		if (!visionResult.success) {
 			return { final_answer: visionResult.extracted_text, success: false };
 		}

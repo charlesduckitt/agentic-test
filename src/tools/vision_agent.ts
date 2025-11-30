@@ -1,6 +1,6 @@
 // src/tools/vision_agent.ts
 // @ts-nocheck
-export async function visionAgent(imageData, query, env) {
+export async function visionAgentFunction(imageData, query, env) {
 	const prompt = `Analyze the image. This image contains a database schema definition, likely from a legacy system. 
     Extract and list all column names, their data types, and any accompanying constraint notes (like NOT NULL or Primary Key) in a clean, plain text block. 
     Do not add commentary or JSON formatting. Focus only on the structured list.`;

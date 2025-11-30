@@ -6,7 +6,7 @@
  * agent (like the Action Agent) and attempts to produce the final user-facing answer.
  * In a database scenario, this would typically execute a query and format the result.
  */
-export async function resolverAgent(processed, env) {
+export async function dataResolverAgent(processed, env) {
 	// <-- CRITICAL FIX: Renamed to match orchestrator
 	// Ask the LLM to produce a final resolved answer
 	const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {

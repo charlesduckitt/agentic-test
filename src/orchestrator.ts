@@ -2,7 +2,7 @@
 // @ts-nocheck
 
 import { intakeAgent } from './agents/intake';
-import { udaaAction } from './tools/udaa_action';
+import { udaaActionAgent } from './tools/udaa_action';
 // CRITICAL FIX: Re-added the missing imports for the action and resolver tools
 import { dataActionAgent } from './tools/data_action';
 import { dataResolverAgent } from './tools/data_resolver';
@@ -17,7 +17,7 @@ export async function runPipeline(message, env) {
 	// 2. Handle UDAA Agent Route (Schema Definition/Execution)
 	if (intake.route === 'udaa_action') {
 		// Pass the full payload (which contains context, schema, image_data)
-		const udaaResult = await udaaAction(intake.full_payload, env);
+		const udaaResult = await udaaActionAgent(intake.full_payload, env);
 
 		// CRITICAL: Human-in-the-Loop Stop Check
 		if (udaaResult.agent_state === 'SCHEMA_PROPOSED') {
