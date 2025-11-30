@@ -1,6 +1,7 @@
 // src/tools/udaa_action.ts - COMPLETE FINAL CODE (Applying fixes to user's original long file structure)
 // @ts-nocheck
 import { visionAgentFunction } from './vision_agent';
+import { safeAiRun } from './ai_client';
 
 // Helper to generate D1 SQL from the proposed schema
 function createTableSQL(tableName, fields) {
@@ -92,7 +93,7 @@ ${visionResult.extracted_text}
 
 JSON:`;
 
-		const response = await env.AI.run('@cf/meta/llama-3.1-8b-instruct', {
+		const response = await safeAiRun(env, '@cf/meta/llama-3.1-8b-instruct', {
 			prompt: structuringPrompt,
 		});
 
