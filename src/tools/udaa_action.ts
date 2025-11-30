@@ -47,6 +47,13 @@ export async function udaaActionAgent(fullPayload, env) {
 			return { final_answer: visionResult.extracted_text, success: false };
 		}
 
+		// Truncate the vision-extracted text to keep the prompt within the model context
+		let extractedText = visionResult.extracted_text || '';
+		const MAX_EXTRACTED_CHARS = 4000; // conservative cap (~1000 tokens)
+		if (extractedText.length > MAX_EXTRACTED_CHARS) {
+			extractedText = extractedText.slice(0, MAX_EXTRACTED_CHARS) + '\n\n[TRUNCATED]';
+		}
+
 		const structuringPrompt = `You are a Schema Normalization Agent.
 Your task is to take the provided raw text, which describes a database schema, and convert it into a structured JSON array of objects.
 Each object in the array should represent a column and have the following keys:
@@ -84,11 +91,12 @@ Example Output:
         { "name": "amount", "type": "REAL", "constraints": [] }
     ]
 }
+
 \`\`\`
 
 Now, process the following raw schema text:
 \`\`\`
-${visionResult.extracted_text}
+${extractedText}
 \`\`\`
 
 JSON:`;
